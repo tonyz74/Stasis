@@ -13,3 +13,6 @@
 [submodule "deps/imgui"]
 	path = deps/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "src/window/glfw3webgpu"]
+	path = src/window/glfw3webgpu
+	url = https://github.com/eliemichel/glfw3webgpu
