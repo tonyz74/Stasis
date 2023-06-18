@@ -46,6 +46,48 @@ WGPUAdapter request_adapter(
     return udata.adapter;
 }
 
+WGPUDevice request_device(
+    WGPUAdapter adapter,
+    const WGPUDeviceDescriptor *descriptor
+) {
+    struct UserData {
+        WGPUDevice device;
+        bool request_ended = false;
+    };
+
+    UserData udata;
+
+    auto callback = [](
+        WGPURequestDeviceStatus status,
+        WGPUDevice adapter,
+        const char *msg, void *user_data
+    ) {
+        UserData *data = (UserData *) user_data;
+
+        if (status == WGPURequestDeviceStatus_Success) {
+            data->device = adapter;
+        }  else {
+            PANIC("[render] failed to request device!\n");
+        }
+
+        data->request_ended = true;
+    };
+
+    wgpuAdapterRequestDevice(adapter, descriptor, callback, &udata);
+
+    if (!udata.request_ended) {
+        PANIC("[render] device request did not end!\n");
+    }
+
+    return udata.device;
+}
+
+
+void on_device_error(WGPUErrorType err_ty, const char *msg, void *udata) {
+    PANIC("[render] uncaptured device error: type %d (%s)!\n", err_ty, msg);
+}
+
+
 i32 main(void) {
     // Initialize all subsystems
     window_manager::startup();
@@ -72,6 +114,31 @@ i32 main(void) {
     opts.compatibleSurface = surface;
 
     WGPUAdapter adapter = request_adapter(instance, &opts);
+
+    usize feature_count = wgpuAdapterEnumerateFeatures(adapter, nullptr);
+    auto features = new WGPUFeatureName[feature_count];
+    wgpuAdapterEnumerateFeatures(adapter, features);
+
+    printf("features: ");
+    for (usize i = 0; i < feature_count; i++) {
+        printf("%u, ", features[i]);
+    }
+    printf("\n");
+
+    
+    WGPUDeviceDescriptor device_desc;
+    device_desc.label = "Render.Device";
+    device_desc.nextInChain = nullptr;
+    device_desc.requiredFeaturesCount = 0;
+    device_desc.requiredLimits = nullptr;
+    device_desc.defaultQueue.nextInChain = nullptr;
+    device_desc.defaultQueue.label = "Render.DefaultQueue";
+
+    WGPUDevice device = request_device(adapter, &device_desc);
+
+    wgpuDeviceSetUncapturedErrorCallback(device, on_device_error, nullptr);
+
+
 
     while (!win.should_close()) {
         win.poll_events();
