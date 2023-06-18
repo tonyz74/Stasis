@@ -135,13 +135,32 @@ i32 main(void) {
     device_desc.defaultQueue.label = "Render.DefaultQueue";
 
     WGPUDevice device = request_device(adapter, &device_desc);
-
     wgpuDeviceSetUncapturedErrorCallback(device, on_device_error, nullptr);
 
+    WGPUQueue queue = wgpuDeviceGetQueue(device);
 
+
+
+    WGPUCommandBuffer cmd_bufs[1];
 
     while (!win.should_close()) {
         win.poll_events();
+
+
+        WGPUCommandEncoderDescriptor encoder_desc = {};
+        encoder_desc.nextInChain = nullptr;
+        encoder_desc.label = "Command Encoder";
+
+        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(
+            device, &encoder_desc
+        );
+
+        WGPUCommandBufferDescriptor cmd_buf_desc = {};
+        cmd_buf_desc.label = "Command Buffer";
+        WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmd_buf_desc);
+        cmd_bufs[0] = command;
+
+        wgpuQueueSubmit(queue, 1, cmd_bufs);
     }
 
     win.destroy();
