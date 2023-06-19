@@ -8,5 +8,6 @@
 #include "option.h"
 #include "result.h"
 #include "log.h"
+#include "asserts.h"
 
 #endif // !STASIS_COMMON_H

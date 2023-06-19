@@ -31,7 +31,8 @@ sources = [
   'src/window/glfw3webgpu/glfw3webgpu.m',
 
   # driver
-  'src/main.cpp'
+  'src/main.cpp',
+  'src/core/log.cpp'
 ]
 
 executable(

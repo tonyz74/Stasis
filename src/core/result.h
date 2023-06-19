@@ -2,6 +2,7 @@
 #define STASIS_CORE_RESULT_H
 
 #include "log.h"
+#include "asserts.h"
 #include "types.h"
 
 template<typename T, typename E>
