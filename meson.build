@@ -35,6 +35,7 @@ sources = [
   'src/core/log.cpp',
   'src/platform/fs.cpp',
   'src/memory/system_allocator.cpp',
+  'src/memory/memory.cpp',
 ]
 
 executable(

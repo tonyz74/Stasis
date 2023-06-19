@@ -49,7 +49,7 @@ u32 file::read_all(u8 *output_buf) {
 
 
 u8 * file::read_all_alloc(allocator *a) {
-    u8 *result = a->alloc(get_size() + 1).unwrap();
+    u8 *result = (u8 *) a->alloc(get_size() + 1).unwrap();
     u32 len = this->read_all(result);
     result[len] = '\0';
 

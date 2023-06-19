@@ -1,15 +1,15 @@
 #include "system_allocator.h"
 
-option<u8 *> system_allocator::alloc(u32 n) {
+option<void *> system_allocator::alloc(u32 n) {
     void *ret = malloc(n);
 
     if (ret == NULL) {
-        return option<u8 *>::none(); 
+        return option<void *>::none(); 
     }
 
-    return option<u8 *>::some((u8 *) ret);
+    return option<void *>::some((void *) ret);
 }
 
-void system_allocator::dealloc(u8 *data) {
+void system_allocator::dealloc(void *data) {
     free(data);
 }

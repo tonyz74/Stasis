@@ -6,6 +6,7 @@
 #include <webgpu.h>
 #include <wgpu.h>
 
+#include "memory/memory.h"
 #include "memory/system_allocator.h"
 #include "core/allocator.h"
 #include "core/common.h"
@@ -96,6 +97,10 @@ i32 main(void) {
     // Initialize all subsystems
     window_manager::startup();
 
+
+    memory::alloc(memory_tag::ECS, 1024);
+    printf("%s\n", memory::display_stats());
+
     // Create window
     window win = window::create((window_opts) {
         .title = "Stasis",
@@ -159,21 +164,6 @@ i32 main(void) {
     WGPUSwapChain swapchain = wgpuDeviceCreateSwapChain(device, surface, &swapchain_desc);
 
     WGPUCommandBuffer cmd_bufs[1];
-
-    system_allocator sys_alloc;
-
-    file f = file::open("/users/tony/desktop/programming/stasis/run.py", file_mode::READ).unwrap();
-    u8* buf = f.read_all_alloc(&sys_alloc);
-    INFO("read file, result: \n%s\n", buf);
-    f.close();
-
-
-    f = file::open("/users/tony/desktop/test_write.txt", file_mode::WRITE).unwrap();
-
-    u8 contents[] = "HELLO WORLD!!!\n";
-    f.write_all(contents, sizeof(contents) - 1);
-
-    f.close();
 
     while (!win.should_close()) {
         win.poll_events();

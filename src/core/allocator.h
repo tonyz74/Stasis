@@ -6,8 +6,8 @@
 
 class allocator {
 public:
-    virtual option<u8 *> alloc(u32 n) = 0;
-    virtual void dealloc(u8 *bytes) = 0;
+    virtual option<void *> alloc(u32 n) = 0;
+    virtual void dealloc(void *bytes) = 0;
 };
 
 #endif // !STASIS_CORE_ALLOCATOR_H

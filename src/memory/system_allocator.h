@@ -6,8 +6,8 @@
 
 // Allocator that uses malloc and free
 class system_allocator : public allocator {
-    virtual option<u8 *> alloc(u32 n) override;
-    virtual void dealloc(u8 *bytes) override;
+    virtual option<void *> alloc(u32 n) override;
+    virtual void dealloc(void *bytes) override;
 };
 
 #endif // !STASIS_MEMORY_SYSTEM_ALLOCATOR_H
