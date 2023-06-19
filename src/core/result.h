@@ -6,7 +6,8 @@
 #include "types.h"
 
 template<typename T, typename E>
-struct result {
+class result {
+public:
     static result<T, E> ok(T x) {
         return (result) {
             .tag = 0,
@@ -26,12 +27,12 @@ struct result {
     }
 
     bool is_err() const {
-        return !is_ok();
+        return tag == 1;
     }
 
     T unwrap() const {
         if (is_err()) {
-            PANIC("[core] Tried to unwrap an error!"); 
+            PANIC("[core] Tried to unwrap an error (or invalid)!"); 
         } 
 
         return inner;
@@ -39,14 +40,14 @@ struct result {
 
     E get_err() const {
         if (is_ok()) {
-            PANIC("[core] Tried to get error of an OK!");
+            PANIC("[core] Tried to get error of an OK (or invalid)!");
         }
 
         return inner;
     }
 
 private:
-    u8 tag;
+    i8 tag = -1;
     union {
         T ok;
         E payload;

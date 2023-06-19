@@ -32,7 +32,8 @@ sources = [
 
   # driver
   'src/main.cpp',
-  'src/core/log.cpp'
+  'src/core/log.cpp',
+  'src/platform/fs.cpp',
 ]
 
 executable(

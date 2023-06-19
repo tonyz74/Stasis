@@ -10,6 +10,8 @@
 #include "window/window.h"
 #include "window/glfw3webgpu/glfw3webgpu.h"
 
+#include "platform/fs.h"
+
 WGPUAdapter request_adapter(
     WGPUInstance instance,
     WGPURequestAdapterOptions const* opts
@@ -155,6 +157,23 @@ i32 main(void) {
     WGPUSwapChain swapchain = wgpuDeviceCreateSwapChain(device, surface, &swapchain_desc);
 
     WGPUCommandBuffer cmd_bufs[1];
+
+
+    file f = file::open("/users/tony/desktop/programming/stasis/run.py", file_mode::READ).unwrap();
+    int max_len = f.get_size();
+    u8 *output_buf = new u8[max_len + 1];
+    int len = f.read_all(output_buf, max_len);
+    output_buf[len] = 0;
+    INFO("read file, result: \n%s\n", output_buf);
+    f.close();
+
+
+    f = file::open("/users/tony/desktop/test_write.txt", file_mode::WRITE).unwrap();
+
+    u8 buf[] = "HELLO WORLD!!!\n";
+    f.write_all(buf, sizeof(buf) - 1);
+
+    f.close();
 
     while (!win.should_close()) {
         win.poll_events();
