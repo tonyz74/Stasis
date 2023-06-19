@@ -140,31 +140,77 @@ i32 main(void) {
     WGPUQueue queue = wgpuDeviceGetQueue(device);
 
 
+    WGPUSwapChainDescriptor swapchain_desc = {};
+    swapchain_desc.label = "Render.SwapChain";
+    swapchain_desc.nextInChain = nullptr; 
+    swapchain_desc.width = 800;
+    swapchain_desc.height = 600;
+
+    WGPUTextureFormat swapchain_format = wgpuSurfaceGetPreferredFormat(
+        surface, adapter
+    );
+    swapchain_desc.format = swapchain_format;
+    swapchain_desc.usage = WGPUTextureUsage_RenderAttachment;
+    swapchain_desc.presentMode = WGPUPresentMode_Fifo;
+    WGPUSwapChain swapchain = wgpuDeviceCreateSwapChain(device, surface, &swapchain_desc);
 
     WGPUCommandBuffer cmd_bufs[1];
 
     while (!win.should_close()) {
         win.poll_events();
 
+        WGPUTextureView frame_texture = wgpuSwapChainGetCurrentTextureView(swapchain);
+
+        if (!frame_texture) {
+            PANIC("[render] could not get texture for frame!\n");
+        }
 
         WGPUCommandEncoderDescriptor encoder_desc = {};
         encoder_desc.nextInChain = nullptr;
-        encoder_desc.label = "Command Encoder";
+        encoder_desc.label = "Render.CommandEncoder";
 
         WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(
             device, &encoder_desc
-        );
+        );  
 
         WGPUCommandBufferDescriptor cmd_buf_desc = {};
-        cmd_buf_desc.label = "Command Buffer";
+        cmd_buf_desc.label = "Render.CommandBuffer";
+
+
+        WGPURenderPassColorAttachment render_pass_color_attachment = {};
+        render_pass_color_attachment.view = frame_texture;
+        render_pass_color_attachment.resolveTarget = nullptr;
+        render_pass_color_attachment.loadOp = WGPULoadOp_Clear;
+        render_pass_color_attachment.storeOp = WGPUStoreOp_Store;
+        render_pass_color_attachment.clearValue = WGPUColor { 0.9, 0.1, 0.2, 1.0 };
+
+        WGPURenderPassDescriptor render_pass_desc = {};
+        render_pass_desc.nextInChain = nullptr;
+        render_pass_desc.colorAttachmentCount = 1;
+        render_pass_desc.colorAttachments = &render_pass_color_attachment;
+        render_pass_desc.depthStencilAttachment = nullptr;
+
+        WGPURenderPassEncoder render_pass = wgpuCommandEncoderBeginRenderPass(
+            encoder, &render_pass_desc
+        );
+        wgpuRenderPassEncoderEnd(render_pass);
+
+
         WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmd_buf_desc);
         cmd_bufs[0] = command;
+        // Already dropped due to finish, don't worry
+        // wgpuCommandEncoderDrop(encoder);
 
+        // Drops the command buffers automatically
         wgpuQueueSubmit(queue, 1, cmd_bufs);
+
+        wgpuTextureViewDrop(frame_texture);
+        wgpuSwapChainPresent(swapchain);
     }
 
     win.destroy();
 
+    wgpuSwapChainDrop(swapchain);
     wgpuAdapterDrop(adapter);
     wgpuInstanceDrop(instance);
 
