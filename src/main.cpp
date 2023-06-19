@@ -6,6 +6,8 @@
 #include <webgpu.h>
 #include <wgpu.h>
 
+#include "memory/system_allocator.h"
+#include "core/allocator.h"
 #include "core/common.h"
 #include "window/window.h"
 #include "window/glfw3webgpu/glfw3webgpu.h"
@@ -158,20 +160,18 @@ i32 main(void) {
 
     WGPUCommandBuffer cmd_bufs[1];
 
+    system_allocator sys_alloc;
 
     file f = file::open("/users/tony/desktop/programming/stasis/run.py", file_mode::READ).unwrap();
-    int max_len = f.get_size();
-    u8 *output_buf = new u8[max_len + 1];
-    int len = f.read_all(output_buf, max_len);
-    output_buf[len] = 0;
-    INFO("read file, result: \n%s\n", output_buf);
+    u8* buf = f.read_all_alloc(&sys_alloc);
+    INFO("read file, result: \n%s\n", buf);
     f.close();
 
 
     f = file::open("/users/tony/desktop/test_write.txt", file_mode::WRITE).unwrap();
 
-    u8 buf[] = "HELLO WORLD!!!\n";
-    f.write_all(buf, sizeof(buf) - 1);
+    u8 contents[] = "HELLO WORLD!!!\n";
+    f.write_all(contents, sizeof(contents) - 1);
 
     f.close();
 

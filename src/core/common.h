@@ -9,5 +9,6 @@
 #include "result.h"
 #include "log.h"
 #include "asserts.h"
+#include "allocator.h"
 
 #endif // !STASIS_COMMON_H

@@ -33,17 +33,29 @@ u32 file::read(u8 *output_buf, u32 buf_size) {
     return read_amount;
 }
 
-u32 file::read_all(u8 *output_buf, u32 buf_size) {
-    u32 total_read = 0;
-    u32 remaining = buf_size;
+u32 file::read_all(u8 *output_buf) {
+    u32 total = get_size();
 
-    while (total_read != buf_size) {
+    u32 total_read = 0;
+    u32 remaining = total;
+
+    while (total_read != total) {
         total_read += this->read(output_buf, remaining);
         remaining -= total_read;
     }
     
     return total_read;
 }
+
+
+u8 * file::read_all_alloc(allocator *a) {
+    u8 *result = a->alloc(get_size() + 1).unwrap();
+    u32 len = this->read_all(result);
+    result[len] = '\0';
+
+    return result;
+}
+
 
 u32 file::write(u8 *buf, u32 len) {
     return ::write(this->fd, buf, len);
